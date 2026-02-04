@@ -1,0 +1,5 @@
+venv/
+*.pyc
+__pycache__/
+links_db.sqlite
+.streamlit/
