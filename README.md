@@ -51,4 +51,13 @@ requirements.txt: Python dependencies.
 
 .streamlit/config.toml: Custom port and UI settings.
 
+## ☁️ Backup Configuration (Google Drive)
+This project uses **Rclone** for automated backups.
+
+1. Install Rclone: `sudo apt install rclone`
+2. Configure: `rclone config` (Remote name must be `gdrive`)
+3. Automated via Crontab:
+   - Script: `backup.sh`
+   - Schedule: Daily at 02:00
+
 Created by Ludek
