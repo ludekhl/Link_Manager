@@ -138,18 +138,23 @@ with st.sidebar:
         # Rename/Delete
         current_groups = [g for g in get_all_groups() if g != "General"]
         if current_groups:
-            target_g = st.selectbox("Select Group to Edit", options=current_groups)
-            rename_val = st.text_input("Rename to", value=target_g)
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Update", use_container_width=True):
-                    rename_group(target_g, rename_val)
-                    st.rerun()
-            with col2:
-                if st.button("🗑️ Delete", use_container_width=True):
-                    delete_group(target_g)
-                    st.rerun()
+            group_search = st.text_input("🔍 Search Groups", placeholder="Filter groups...")
+            filtered_groups = [g for g in current_groups if group_search.lower() in g.lower()] if group_search else current_groups
+            if not filtered_groups:
+                st.caption("No groups match your search.")
+            else:
+                target_g = st.selectbox("Select Group to Edit", options=filtered_groups)
+                rename_val = st.text_input("Rename to", value=target_g)
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Update", use_container_width=True):
+                        rename_group(target_g, rename_val)
+                        st.rerun()
+                with col2:
+                    if st.button("🗑️ Delete", use_container_width=True):
+                        delete_group(target_g)
+                        st.rerun()
         else:
             st.caption("No custom groups to edit.")
 
