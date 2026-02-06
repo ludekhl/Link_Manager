@@ -119,7 +119,7 @@ with st.sidebar:
         l_url = st.text_input("URL", value=initial_url)
         groups = get_all_groups()
         l_group = st.selectbox("Group", options=groups)
-        if st.button("Save Link", use_container_width=True):
+        if st.button("Save Link", width="stretch"):
             if l_name and l_url:
                 add_link(l_name, l_url, l_group)
                 st.query_params.clear()
@@ -129,7 +129,7 @@ with st.sidebar:
     with st.expander("📁 Manage Groups"):
         # Create
         new_g = st.text_input("New Group Name")
-        if st.button("Add Group", use_container_width=True):
+        if st.button("Add Group", width="stretch"):
             add_group(new_g)
             st.rerun()
         
@@ -148,11 +148,11 @@ with st.sidebar:
 
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button("Update", use_container_width=True):
+                    if st.button("Update", width="stretch"):
                         rename_group(target_g, rename_val)
                         st.rerun()
                 with col2:
-                    if st.button("🗑️ Delete", use_container_width=True):
+                    if st.button("🗑️ Delete", width="stretch"):
                         delete_group(target_g)
                         st.rerun()
         else:
@@ -160,13 +160,31 @@ with st.sidebar:
 
 # --- Main Dashboard ---
 search = st.text_input("🔍 Quick Search", placeholder="Filter by name or domain...")
+
+# Group filter buttons
+all_groups = get_all_groups()
+group_cols = st.columns(len(all_groups) + 1)
+with group_cols[0]:
+    if st.button("All", width="stretch", type="primary" if "group_filter" not in st.session_state or st.session_state.group_filter is None else "secondary"):
+        st.session_state.group_filter = None
+        st.rerun()
+for i, g in enumerate(all_groups):
+    with group_cols[i + 1]:
+        is_active = st.session_state.get("group_filter") == g
+        if st.button(g, width="stretch", type="primary" if is_active else "secondary"):
+            st.session_state.group_filter = g
+            st.rerun()
+
 df = get_links_df(search)
+active_filter = st.session_state.get("group_filter")
+if active_filter:
+    df = df[df['group_name'] == active_filter]
 
 if df.empty:
     st.info("No links found.")
 else:
     st.subheader("All Links")
-    
+
     column_config = {
         "id": None,
         "url": st.column_config.LinkColumn("URL", width="medium"),
@@ -177,8 +195,7 @@ else:
     edited_df = st.data_editor(
         df,
         column_config=column_config,
-        use_container_width=True,
-        hide_index=True,
+        width="stretch",
         key="link_editor",
         num_rows="dynamic"
     )
