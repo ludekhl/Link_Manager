@@ -1,0 +1,15 @@
+[Unit]
+Description=Link Manager REST API
+After=network.target
+
+[Service]
+Type=simple
+User=ludek
+WorkingDirectory=/home/ludek/link_manager
+EnvironmentFile=/home/ludek/link_manager/.env
+ExecStart=/home/ludek/link_manager/venv/bin/python api.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

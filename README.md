@@ -41,8 +41,35 @@ sudo systemctl start linkmanager.service
 To save links instantly, create a new bookmark in Chrome and paste the following into the URL field (replace the IP with your Pi's IP):
 
 JavaScript
-javascript:window.open('[http://192.168.0.117:7000/?url=](http://192.168.0.117:7000/?url=)' + encodeURIComponent(window.location.href) + '&name=' + encodeURIComponent(document.title));
-📂 Project Structure
+javascript:window.open('http://10.169.196.2:7000/?url=' + encodeURIComponent(window.location.href) + '&name=' + encodeURIComponent(document.title));
+
+> The bookmarklet points at the Pi's ZeroTier address (`10.169.196.2`) so it works from any device joined to the ZeroTier network. On the local LAN the Pi is also reachable at `192.168.0.117:7000`.
+## 🔌 REST API (`api.py`)
+
+A Flask REST API runs alongside the Streamlit UI and shares the same SQLite
+database, so links created via the API appear in the UI and vice versa. It powers
+the `linkmanager` MCP server (used by Claude on M3 and the Briefing Dashboard on
+M2).
+
+- **Runs on:** Pi4 (ServerL01, `10.169.196.2`), port `7001`, as `linkmanager-api.service`.
+- **Auth:** every `/api/*` request needs header `X-API-Key: <LINKMANAGER_API_KEY>` (set in `.env`). `/health` is open.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | Liveness + link count (no auth) |
+| GET | `/api/links?q=&group=&limit=` | List / search links (matches name OR url) |
+| GET | `/api/links/<id>` | Get one link |
+| POST | `/api/links` | Create link — JSON `{name, url, group}` (group auto-created) |
+| PATCH | `/api/links/<id>` | Update link — any of `{name, url, group}` |
+| DELETE | `/api/links/<id>` | Delete link |
+| GET | `/api/groups` | List groups (categories) with link counts |
+| POST | `/api/groups` | Create group — `{name}` |
+| PATCH | `/api/groups/<old>` | Rename group — `{name}` (links move with it) |
+| DELETE | `/api/groups/<name>` | Delete group (its links fall back to `General`) |
+
+"Category" in everyday terms == the `group` field. `General` cannot be renamed or deleted.
+
+## 📂 Project Structure
 app.py: Main Streamlit application logic.
 
 links_db.sqlite: Local database file (git-ignored for privacy).
